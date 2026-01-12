@@ -145,6 +145,7 @@ rtsp://localhost:8554/rt1
 
 ## Notes
 
+* If something wrong please make sure you can login here https://key.rt.ru/main/pwa/dashboard
 * A **random `x-device-id` UUID** is generated on each login
 * `streamer_token` is automatically URL-encoded
 * Only cameras available in your Rostelecom Key account are included

@@ -12,6 +12,7 @@ rt_key_to_go2rtc.py
 Example:
   python3 rt_key_to_go2rtc.py --phone 79123456789 --password 'MyPassword' \
       --save-json cameras.json --out streams.yaml
+  python3 rt_key_to_go2rtc.py --access-token 'eyJ...'
 
 If --out is not specified, output is printed to stdout.
 """
@@ -131,6 +132,7 @@ Examples:
   python3 rt_key_to_go2rtc.py --phone 79123456789 --password MyPassword
   python3 rt_key_to_go2rtc.py --phone 79123456789 --password MyPassword \\
       --save-json cameras.json --out streams.yaml
+  python3 rt_key_to_go2rtc.py --access-token eyJ...
 
 If --out is "-", output is printed to stdout.
 """
@@ -141,8 +143,20 @@ If --out is "-", output is printed to stdout.
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("--phone", required=True, help="Phone number, e.g. 79123456789")
-    parser.add_argument("--password", required=True, help="Account password")
+    parser.add_argument(
+        "--phone",
+        help="Phone number, e.g. 79123456789 "
+             "(required with --password if --access-token is not provided)",
+    )
+    parser.add_argument(
+        "--password",
+        help="Account password "
+             "(required with --phone if --access-token is not provided)",
+    )
+    parser.add_argument(
+        "--access-token",
+        help="Use existing access_token instead of logging in with --phone/--password",
+    )
 
     parser.add_argument(
         "--save-json",
@@ -174,14 +188,26 @@ If --out is "-", output is printed to stdout.
         help="HTTP request timeout in seconds (default: 20)",
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.access_token:
+        if args.phone or args.password:
+            parser.error("Use either --access-token or --phone/--password, not both")
+    else:
+        if not args.phone or not args.password:
+            parser.error("Provide --access-token or both --phone and --password")
+
+    return args
 
 
 def main() -> int:
     args = parse_args()
 
     try:
-        access_token = login(args.phone, args.password, timeout=args.timeout)
+        if args.access_token:
+            access_token = args.access_token
+        else:
+            access_token = login(args.phone, args.password, timeout=args.timeout)
         cameras_json = fetch_cameras(access_token, timeout=args.timeout)
 
         if args.save_json != "-":

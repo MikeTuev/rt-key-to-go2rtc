@@ -8,7 +8,7 @@ The script automates the process of turning Rostelecom Key cloud cameras into lo
 
 ## What the Script Does
 
-1. Authenticates to Rostelecom Key using **phone number and password**
+1. Authenticates to Rostelecom Key using **phone/password** or a ready **access_token**
 2. Retrieves the cameras list (`cameras.json`)
 3. Extracts camera IDs and streamer tokens
 4. Generates `ffmpeg:` stream entries for **go2rtc**
@@ -96,10 +96,17 @@ python3 rt_key_to_go2rtc.py \
   --out streams.yaml
 ```
 
+Authorization with an existing token:
+
+```bash
+python3 rt_key_to_go2rtc.py --access-token your_access_token
+```
+
 Options:
 
 * `--save-json` — save fetched cameras list to a file
 * `--out` — save generated go2rtc stream entries to a file
+* `--access-token` — use a pre-obtained token (instead of `--phone` + `--password`)
 * If `--out` is not specified, output is printed to the console
 
 ---
@@ -149,7 +156,7 @@ rtsp://localhost:8554/rt1
 * A **random `x-device-id` UUID** is generated on each login
 * `streamer_token` is automatically URL-encoded
 * Only cameras available in your Rostelecom Key account are included
-* Credentials are passed via command line — be careful with shell history
+* Credentials or tokens are passed via command line — be careful with shell history
 * Inspired by https://github.com/IokReal/intercom_for_rtc
 
 ---

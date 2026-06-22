@@ -6,6 +6,62 @@ The script automates the process of turning Rostelecom Key cloud cameras into lo
 
 ---
 
+## Quick install (go2rtc + auto-renew)
+
+One command sets everything up: auto-detects the CPU architecture and downloads the
+matching go2rtc build (**amd64 / arm64 / arm / i386**), installs deps via `apt`
+(`python3`, `python3-requests`, `ffmpeg`, `curl`), installs a **systemd service**,
+and adds a **cron job** that refreshes the per-camera tokens every 6 hours (they
+expire after a few hours) and restarts go2rtc. Must be run as **root** (it
+re-execs via `sudo` automatically).
+
+```bash
+git clone https://github.com/MikeTuev/rt-key-to-go2rtc.git
+cd rt-key-to-go2rtc
+sudo ./install.sh
+```
+
+Interactive run asks for your **access-token** and prints where to find it. We use
+**token-only** auth — login by phone/password is **not** used because it can
+require a captcha.
+
+**Unattended install** (pass everything as parameters):
+
+```bash
+sudo ./install.sh --token eyJ... [--install-dir /opt/go2rtc] [--arch arm64] -y
+# or via env:  ACCESS_TOKEN=eyJ... INSTALL_DIR=/opt/go2rtc sudo -E ./install.sh -y
+```
+
+**Uninstall** (removes service, cron, install dir + token):
+
+```bash
+sudo ./uninstall.sh           # add -y to skip the confirmation
+```
+
+**Where to get the access-token (from the browser):**
+
+1. Open <https://key.rt.ru/main/pwa/dashboard> and log in.
+2. `F12` → **Network** tab.
+3. Find the `barrier` request and copy the header `Authorization: Bearer <TOKEN>`.
+4. The `<TOKEN>` is the long `eyJ...` string. (More detail in [archive/README.md](archive/README.md).)
+
+The token is stored only locally in `<INSTALL_DIR>/access_token` (chmod 600) and
+is **never** committed to the repo. Default `INSTALL_DIR` is `/opt/go2rtc`.
+
+After install, open the **go2rtc Web UI** in your browser:
+
+```
+http://localhost:1984
+```
+
+(or `http://<host-ip>:1984` from another device). RTSP streams are at
+`rtsp://localhost:8554/rt1`, `.../rt2`, … Manage the service with
+`systemctl status go2rtc` and `journalctl -u go2rtc -f`.
+
+The manual steps below are an alternative if you prefer to set things up by hand.
+
+---
+
 ## What the Script Does
 
 1. Authenticates to Rostelecom Key using **phone/password** or a ready **access_token**

@@ -1,0 +1,17 @@
+# secrets / runtime-generated — NEVER commit
+access_token
+cameras.json
+streams.yaml
+go2rtc.yaml
+
+# downloaded go2rtc binaries (note: trailing names only, not the go2rtc/ dir)
+go2rtc_linux_*
+
+# archive exports, logs and scratch notes
+archive/*.mp4
+archive/*.log
+archive/archive-info
+
+# python
+__pycache__/
+*.pyc
